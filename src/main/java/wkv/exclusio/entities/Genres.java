@@ -1,0 +1,31 @@
+package wkv.exclusio.entities;
+
+public enum Genres {
+
+	ANIMATION,
+    BIOPIC,
+    COMEDIE,
+    DOCUMENTAIRE,
+    DRAME,
+    HISTOIRE,
+    THRILLER,
+    EPOUVANTE_HORREUR,
+    SCIENCE_FICTION,
+    AVENTURE,
+    FRANCAIS,
+    JEUNESSE,
+    ACTION,
+    POLICIER,
+    SUPER_HEROS,
+    ROMANCE,
+    FANTASY,
+    MUSICAL,
+    GUERRE,
+    COMEDIE_DRAMATIQUE,
+    EROTIQUE,
+    ESPIONNAGE,
+    WESTERN,
+    COMEDIE_MUSICALE,
+    JUDICIAIRE,
+    ARTS_MARTIAUX
+}

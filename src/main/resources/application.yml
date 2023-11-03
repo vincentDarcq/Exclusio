@@ -1,0 +1,14 @@
+spring:
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: always
+  datasource:
+    url: jdbc:sqlserver://localhost:1433;databaseName=master;user=SA;password=uTLhewpTC12;encrypt=false;trustServerCertificate=true;
+    username: SA
+    password: uTLhewpTC12;
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    hibernate:
+      ddl-auto: update
