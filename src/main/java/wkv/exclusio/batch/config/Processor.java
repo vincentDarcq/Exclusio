@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import wkv.exclusio.entities.Genres;
 import wkv.exclusio.entities.MovieEntity;
+import wkv.exclusio.services.ImdbService;
 import wkv.exclusio.services.MovieService;
 
 import java.util.ArrayList;
@@ -27,13 +28,19 @@ import org.jsoup.select.Elements;
 public class Processor implements ItemProcessor<Map<Integer, String>, MovieEntity>{
 	
 	private static final Logger log = LoggerFactory.getLogger(Processor.class);
-	
 	@Autowired
 	private MovieService movieService;
+	@Autowired
+	private ImdbService imdbService;
 	
     @Override
-    public MovieEntity process(Map<Integer, String> content) throws Exception {
-        return parseContent(content);
+    public MovieEntity process(Map<Integer, String> content) {
+		try {
+			return parseContent(content);
+		}catch(Exception e) {
+			log.error(e.getMessage(), e);
+		}
+        return null;
     }
     
     private MovieEntity parseContent(Map<Integer, String> content) {
@@ -52,7 +59,7 @@ public class Processor implements ItemProcessor<Map<Integer, String>, MovieEntit
         	if(movieElement == null) {
         		log.info("page existante mais sans data json");
         		return null;
-        	}else {        		
+        	}else {
         		String movieObjString = movieElement.html();
         		
         		Elements avertissement_pegi = body.getElementsByAttributeValue("class", "certificate-text");
@@ -86,6 +93,8 @@ public class Processor implements ItemProcessor<Map<Integer, String>, MovieEntit
         		}
         		JSONObject movieObject = new JSONObject(movieObjString);
         		movie.setTitre(movieObject.getString("name"));
+				String imdbTitle = movie.getTitre().replace("%", "%25").replace(" ", "%20").replace("?", "3F").replace(",", "%2C").replace("#", "%23").replace("$", "%24").replace("&", "%26");
+				movie = imdbService.findGrade(movie, imdbTitle);
         		log.info("processing movie : {}", movie.getTitre());
         		List<Genres> genresToSave = new ArrayList<Genres>();
         		if(movieObject.get("genre") instanceof String) {
@@ -199,8 +208,8 @@ public class Processor implements ItemProcessor<Map<Integer, String>, MovieEntit
     }
     
     private MovieEntity fillPegi(MovieEntity movie, Element content) {
-    	int indexInterdit = content.html().indexOf("Interdit");
-        movie.setPegi(content.html().substring(indexInterdit+22, indexInterdit+24)+"+");
+		int indexInterdit = content.html().indexOf("Interdit");
+        movie.setPegi(content.html().substring(indexInterdit+11, indexInterdit+13)+"+");
     	return movie;
     }
 

@@ -14,6 +14,7 @@ public enum Genres {
     AVENTURE,
     FRANCAIS,
     JEUNESSE,
+    FAMILLE,
     ACTION,
     POLICIER,
     SUPER_HEROS,
@@ -27,5 +28,11 @@ public enum Genres {
     WESTERN,
     COMEDIE_MUSICALE,
     JUDICIAIRE,
-    ARTS_MARTIAUX
+    ARTS_MARTIAUX,
+    BOLLYWOOD,
+    DIVERS,
+    EXPERIMENTAL,
+    PEPLUM,
+    EVENEMENT_SPORTIF,
+    CONCERT
 }

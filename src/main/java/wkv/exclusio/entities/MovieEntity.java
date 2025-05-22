@@ -1,10 +1,12 @@
 package wkv.exclusio.entities;
 
 import java.util.List;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import jakarta.persistence.*;
@@ -189,6 +191,22 @@ public class MovieEntity extends AbstractBaseEntity{
 
     public void setTime(String time) {
         this.time = time;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        MovieEntity that = (MovieEntity) o;
+        return Objects.equals(titre, that.titre) &&
+                year == that.year &&
+                Objects.equals(synopsis, that.synopsis) &&
+                Objects.equals(codeHtmlAllocine, that.codeHtmlAllocine) &&
+                Objects.equals(time, that.time);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(titre, year, synopsis, codeHtmlAllocine, time);
     }
 
 }

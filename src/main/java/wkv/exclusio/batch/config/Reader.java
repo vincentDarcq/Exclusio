@@ -36,7 +36,7 @@ public class Reader implements ItemReader<Map<Integer, String>>{
 	}
 
     @Override
-    public Map<Integer, String> read() throws Exception {
+    public Map<Integer, String> read() {
     	log.info("reader id : {}", id);
     	Map<Integer, String> res = new HashMap<Integer, String>();
         if (id <= MAX) {
@@ -46,12 +46,12 @@ public class Reader implements ItemReader<Map<Integer, String>>{
         		content = this.restTemplate.getForObject(url, String.class);
         	}catch(HttpClientErrorException | HttpServerErrorException e) {
         		log.info("catch");
-        		id++;
         		res.put(id, "");
+				id++;
         		return res;
         	}
-            id++;
             res.put(id, content);
+			id++;
             return res;
         } else {
             return null;

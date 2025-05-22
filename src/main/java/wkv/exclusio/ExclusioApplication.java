@@ -26,7 +26,7 @@ public class ExclusioApplication {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:4200") // Specify the allowed origin(s)
+                        .allowedOrigins("http://localhost:3000", "http://localhost:4200") // Specify the allowed origin(s)
                         .allowedMethods("GET", "POST", "PUT", "DELETE") // Specify the allowed HTTP methods
                         .allowedHeaders("*"); // Specify the allowed headers
             }

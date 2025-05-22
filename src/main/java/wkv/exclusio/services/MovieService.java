@@ -1,13 +1,6 @@
 package wkv.exclusio.services;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,6 +15,7 @@ import wkv.exclusio.entities.Genres;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import wkv.exclusio.repositories.MovieSpecifications;
 
 
 @Service
@@ -79,8 +73,28 @@ public class MovieService {
 			) {
 		log.info("getting page {} of best allo grade movies with exlusion", page);
 		Pageable pageable = PageRequest.of(page, 8);
-		return this.movieRepository.findByGenreNotInAndCastingNotInAndRealisateurNotInOrderByAlloGradeDesc(
-				requestBody.getGenres(), requestBody.getRealisateurs(), requestBody.getCasting(), pageable);
+		return movieRepository.findAll(
+				MovieSpecifications.withExclusions(
+					requestBody.getGenres(),
+					requestBody.getRealisateurs(),
+					requestBody.getCasting()),
+					pageable
+		);
+	}
+
+	public Page<MovieEntity> getPageOfBestAlloGradeMoviesWithInclusions(
+			int page,
+			ObjectRequestForMoviesPageWithExclusion requestBody
+	) {
+		log.info("getting page {} of best allo grade movies with inclusion", page);
+		Pageable pageable = PageRequest.of(page, 8);
+		return movieRepository.findAll(
+				MovieSpecifications.withInclusions(
+						requestBody.getGenres(),
+						requestBody.getRealisateurs(),
+						requestBody.getCasting()),
+						pageable
+		);
 	}
 	
 	public MovieEntity getBestAlloMovie() {
@@ -91,38 +105,8 @@ public class MovieService {
 		return this.movieRepository.findByGenre(genre);
 	}
 
-	public Page<MovieEntity> getMoviesCaroussel(List<String> titre, Pageable page){
-		return this.movieRepository.findByTitreNotInOrderByAlloGradeDesc(page, titre);
-	}
-
-	public Page<MovieEntity> getMoviesByListCaroussel(
-			List<String> genresS,
-			List<String> genresA,
-			List<String> reals,
-			List<String> actors,
-			List<String> titre,
-			Pageable page){
-		List<Genres> genres = new ArrayList<Genres>();
-		genresS.forEach(genre -> { this.putGenre(genre, genres);});
-		genresA.forEach(genre -> { this.putGenre(genre, genres);});
-		return this.movieRepository.findByTitreNotInAndGenreNotInAndCastingNotInAndRealisateurNotInOrderByAlloGradeDesc(
-				titre, genres, reals, actors, page);
-	}
-
 	public List<String> getRealisateurs(){
-		List<MovieEntity> movies = this.getAll();
-		List<String> realisateurs = new ArrayList<String>();
-		List<String> realisateur;
-		for(MovieEntity movie : movies) {
-			realisateur = movie.getRealisateur();
-			for(int i = 0; i < realisateur.size(); i++) {
-				if(!realisateurs.contains(realisateur.get(i))) {
-					realisateurs.add(realisateur.get(i));
-				}
-			}
-		}
-		Collections.sort(realisateurs);
-		return realisateurs;
+		return this.movieRepository.findAllDirectorsWithOccurrences();
 	}
 
 	public List<Integer> loadYears(){
@@ -133,145 +117,88 @@ public class MovieService {
 				years.add(movie.getYear());
 			}
 		}
-		Collections.sort(years, Collections.reverseOrder());
+		years.sort(Collections.reverseOrder());
 		return years;
 	}
 
-	public List<String> getActors(){
-		List<MovieEntity> movies = this.getAll();
-		List<String> actors = new ArrayList<String>();
-		List<String> casting;
-		for(MovieEntity movie : movies) {
-			casting = movie.getCasting();
-			for(int i = 0; i < casting.size(); i++) {
-				if(!actors.contains(casting.get(i))) {
-					actors.add(casting.get(i));
-				}
-			}
-		}
-		return actors;
-	}
-
 	public List<String> getActorsByOccurences(){
-		List<String> actors = this.getActors();
-		List<String> sortActors = new ArrayList<String>();
-		Map<String, Integer> ActorsWithOccurs = new HashMap<String, Integer>();
-		List<String> actorsKnow = new ArrayList<String>();
-		for(String actor : actors) {
-			if(actorsKnow.indexOf(actor) == -1) {
-				int occurrences = Collections.frequency(actors, actor);
-				ActorsWithOccurs.put(actor, occurrences);
-				actorsKnow.add(actor);
-			}
-		}
-		ActorsWithOccurs = this.sortHashMapByValues(ActorsWithOccurs);
-		for(String actor : ActorsWithOccurs.keySet()) {
-			sortActors.add(actor);
-		}
-		return sortActors;
+		return this.movieRepository.findAllActorsWithOccurrences();
 	}
 
-	public List<String> getRealsByOccurences(){
-		List<MovieEntity> movies = this.getAll();
-		List<String> reals = this.getRealisateurs();
-		List<String> sortReals = new ArrayList<String>();
-		Map<String, Integer> RealsWithOccurs = new HashMap<String, Integer>();
-		for(String real : reals) {
-			int cpt = 0;
-			for(MovieEntity movie : movies) {
-				if(movie.getCasting() != null && movie.getCasting().indexOf(real) != -1) {
-					cpt++;
-				}
-			}
-			RealsWithOccurs.put(real, cpt);
-		}
-		RealsWithOccurs = this.sortHashMapByValues(RealsWithOccurs);
-		for(String real : RealsWithOccurs.keySet()) {
-			sortReals.add(real);
-		}
-		return sortReals;
-	}
-
-	public LinkedHashMap<String, Integer> sortHashMapByValues(
-			Map<String, Integer> passedMap) {
-		List<String> mapKeys = new ArrayList<String>(passedMap.keySet());
-		List<Integer> mapValues = new ArrayList<Integer>(passedMap.values());
-		Collections.sort(mapValues, Collections.reverseOrder());
-		Collections.sort(mapKeys);
-
-		LinkedHashMap<String, Integer> sortedMap =
-				new LinkedHashMap<String, Integer>();
-
-		Iterator<Integer> valueIt = mapValues.iterator();
-		while (valueIt.hasNext()) {
-			Integer val = valueIt.next();
-			Iterator<String> keyIt = mapKeys.iterator();
-
-			while (keyIt.hasNext()) {
-				String key = keyIt.next();
-				Integer comp1 = passedMap.get(key);
-				Integer comp2 = val;
-
-				if (comp1 == comp2) {
-					keyIt.remove();
-					sortedMap.put(key, val);
-					break;
-				}
-			}
-		}
-		return sortedMap;
+	public void deleteMovie(MovieEntity movie) {
+		System.out.println("delete " + movie.getTitre());
+		this.movieRepository.delete(movie);
 	}
 
 	public void putGenre(String genre, List<Genres> genresToSave) {
 		switch(genre) {
+			case "Romance":
 			case "ROMANCE":
 				genresToSave.add(Genres.ROMANCE);
 				break;
+			case "Drame":
 			case "DRAME":
 				genresToSave.add(Genres.DRAME);
 				break;
+			case "Comédie":
 			case "COMEDIE":
 				genresToSave.add(Genres.COMEDIE);
 				break;
+			case "Thriller":
 			case "THRILLER":
 				genresToSave.add(Genres.THRILLER);
 				break;
+			case "Science Fiction":
 			case "SCIENCE_FICTION":
 				genresToSave.add(Genres.SCIENCE_FICTION);
 				break;
+			case "Animation":
 			case "ANIMATION":
 				genresToSave.add(Genres.ANIMATION);
 				break;
 			case "JEUNESSE":
 				genresToSave.add(Genres.JEUNESSE);
 				break;
+			case "Famille":
+				genresToSave.add(Genres.FAMILLE);
+				break;
+			case "Aventure":
 			case "AVENTURE":
 				genresToSave.add(Genres.AVENTURE);
 				break;
+			case "Historique":
 			case "HISTOIRE":
 				genresToSave.add(Genres.HISTOIRE);
 				break;
+			case "Action":
 			case "ACTION":
 				genresToSave.add(Genres.ACTION);
 				break;
+			case "Fantastique":
 			case "FANTASY":
 				genresToSave.add(Genres.FANTASY);
 				break;
+			case "Epouvante-horreur":
 			case "EPOUVANTE_HORREUR":
 				genresToSave.add(Genres.EPOUVANTE_HORREUR);
 				break;
+			case "Policier":
 			case "POLICIER":
 				genresToSave.add(Genres.POLICIER);
 				break;
+			case "Biopic":
 			case "BIOPIC":
 				genresToSave.add(Genres.BIOPIC);
 				break;
+			case "Guerre":
 			case "GUERRE":
 				genresToSave.add(Genres.GUERRE);
 				break;
+			case "Documentaire":
 			case "DOCUMENTAIRE":
 				genresToSave.add(Genres.DOCUMENTAIRE);
 				break;
+			case "Musical":
 			case "MUSICAL":
 				genresToSave.add(Genres.MUSICAL);
 				break;
@@ -296,6 +223,26 @@ public class MovieService {
 			case "Arts Martiaux":
 				genresToSave.add(Genres.ARTS_MARTIAUX);
 				break;
+			case "Bollywood":
+				genresToSave.add(Genres.BOLLYWOOD);
+				break;
+			case "Divers":
+				genresToSave.add(Genres.DIVERS);
+				break;
+			case "Expérimental":
+				genresToSave.add(Genres.EXPERIMENTAL);
+				break;
+			case "Péplum":
+				genresToSave.add(Genres.PEPLUM);
+				break;
+			case "Évènement Sportif":
+				genresToSave.add(Genres.EVENEMENT_SPORTIF);
+				break;
+			case "Concert":
+				genresToSave.add(Genres.CONCERT);
+				break;
+			default:
+				log.info("Unknown genre {}", genre);
 		}
 	}
 }

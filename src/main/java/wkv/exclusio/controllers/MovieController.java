@@ -1,6 +1,9 @@
 package wkv.exclusio.controllers;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
@@ -50,8 +53,12 @@ public class MovieController {
 	@ResponseBody
 	public MovieEntity findSubTitle(@PathVariable String titre) {
 		log.info("titre cherché : {}", titre);
-		return this.movieService.getBestAlloMovie();
-	}
+        try {
+            return this.movieService.findMovieBySubTitre(titre);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 	
 	@PostMapping("/exclusions/{page}")
 	@ResponseBody
@@ -60,7 +67,16 @@ public class MovieController {
 			@RequestBody ObjectRequestForMoviesPageWithExclusion requestBody
 			) {
 		return this.movieService.getPageOfBestAlloGradeMoviesWithExclusions(page, requestBody);
-	}	
+	}
+
+	@PostMapping("/inclusions/{page}")
+	@ResponseBody
+	public Page<MovieEntity> listMoviesWithInclusions(
+			@PathVariable int page,
+			@RequestBody ObjectRequestForMoviesPageWithExclusion requestBody
+	) {
+		return this.movieService.getPageOfBestAlloGradeMoviesWithInclusions(page, requestBody);
+	}
 	
 	@GetMapping("/movie/{id}")
 	@ResponseBody
@@ -79,12 +95,25 @@ public class MovieController {
 	@GetMapping("/realisateurs")
 	@ResponseBody
 	public List<String> listTenReals() {
-		return this.movieService.getRealsByOccurences();
+		return this.movieService.getRealisateurs();
 	}
 
 	@GetMapping("/byGenre/{genre}")
 	@ResponseBody
 	public List<MovieEntity> listMoviesByGenre(@PathVariable Genres genre){
 		return this.movieService.getMoviesByGenre(genre);
+	}
+
+	@GetMapping("/deleteDoublons")
+	public void deleteDoublons(){
+		List<MovieEntity> list = this.movieService.getAll();
+		Set<MovieEntity> seen = new HashSet<>();
+		Set<MovieEntity> duplicates = list.stream()
+				.filter(e -> !seen.add(e))
+				.collect(Collectors.toSet());
+
+		for (MovieEntity movie : duplicates) {
+			this.movieService.deleteMovie(movie);
+		}
 	}
 }

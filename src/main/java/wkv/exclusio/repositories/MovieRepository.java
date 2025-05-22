@@ -6,32 +6,43 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import wkv.exclusio.entities.Genres;
 import wkv.exclusio.entities.MovieEntity;
 
 @Repository
-public interface MovieRepository extends JpaRepository<MovieEntity, Long>{
+public interface MovieRepository extends JpaRepository<MovieEntity, Long>, JpaSpecificationExecutor<MovieEntity> {
 
-	public Optional<MovieEntity> findById(Long id);
+	Optional<MovieEntity> findById(Long id);
+
+    List<MovieEntity> findByTitre(String titre);
 	
-	public Optional<MovieEntity> findByTitreContainingIgnoreCase(String titre);
+	Optional<MovieEntity> findByTitreContainingIgnoreCase(String titre);
 
-    public List<MovieEntity> findByGenre(Genres genre);
+    List<MovieEntity> findByGenre(Genres genre);
 
-    public Page<MovieEntity> findByOrderByAlloGradeDesc(Pageable page);
+    Page<MovieEntity> findByOrderByAlloGradeDesc(Pageable page);
+
+    @Query(value = """
+        SELECT casting
+        FROM movie_entity_casting
+        GROUP BY casting
+        ORDER BY COUNT(*) DESC, casting ASC
+        """, nativeQuery = true)
+    List<String> findAllActorsWithOccurrences();
+
+    @Query(value = """
+        SELECT realisateur
+        FROM movie_entity_realisateur
+        GROUP BY realisateur
+        ORDER BY COUNT(*) DESC, realisateur ASC
+        """, nativeQuery = true)
+    List<String> findAllDirectorsWithOccurrences();
     
-    public Page<MovieEntity> findByGenreNotInAndCastingNotInAndRealisateurNotInOrderByAlloGradeDesc(
-    		List<Genres> genres, List<String> realisateurs,List<String> casting, Pageable page);
-    
-    public MovieEntity findFirstByOrderByAlloGradeDesc();    
+    MovieEntity findFirstByOrderByAlloGradeDesc();
 
-    public MovieEntity findFirstByGenreNotInAndCastingNotInAndRealisateurNotInOrderByAlloGradeDesc(
-            List<Genres> genres, List<String> realisateurs,List<String> casting);
-
-    public Page<MovieEntity> findByTitreNotInOrderByAlloGradeDesc(Pageable page, List<String> titre);
-
-    public Page<MovieEntity> findByTitreNotInAndGenreNotInAndCastingNotInAndRealisateurNotInOrderByAlloGradeDesc(
-            List<String> titre, List<Genres> genres, List<String> realisateurs,List<String> casting, Pageable page);
 }
