@@ -34,5 +34,10 @@ public enum Genres {
     EXPERIMENTAL,
     PEPLUM,
     EVENEMENT_SPORTIF,
-    CONCERT
+    CONCERT,
+    MEDICAL,
+    FEUILLETON,
+    DESSIN_ANIME,
+    CLASSIQUE,
+    WEB_SERIES
 }

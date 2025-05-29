@@ -1,4 +1,4 @@
-package wkv.exclusio.batch.config;
+package wkv.exclusio.batch.movies;
 
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.Chunk;

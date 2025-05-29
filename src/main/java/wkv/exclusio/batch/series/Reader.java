@@ -1,8 +1,4 @@
-package wkv.exclusio.batch.config;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+package wkv.exclusio.batch.series;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,9 +7,14 @@ import org.springframework.batch.item.ItemReader;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
-
 import wkv.exclusio.entities.MovieEntity;
+import wkv.exclusio.entities.SerieEntity;
 import wkv.exclusio.repositories.MovieRepository;
+import wkv.exclusio.repositories.SerieRepository;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 @StepScope
@@ -26,12 +27,12 @@ public class Reader implements ItemReader<Map<Integer, String>>{
 	private int id = 1;
 	private static final int MAX = 500000;
 	
-	public Reader(RestTemplate restTemplate, MovieRepository movieRepository) {
+	public Reader(RestTemplate restTemplate, SerieRepository serieRepository) {
 		this.restTemplate = restTemplate;
-		List<MovieEntity> movies = movieRepository.findAll();
-		if(movies.size() > 0) {			
-			id = Integer.parseInt(movies.get(movies.size()-1).getCodeHtmlAllocine())+1;
-			log.info("id : {}", id);
+		List<SerieEntity> series = serieRepository.findAll();
+		if(!series.isEmpty()) {
+			id = Integer.parseInt(series.get(series.size()-1).getCodeHtmlAllocine())+1;
+			log.info("id serie: {}", id);
 		}
 	}
 
@@ -40,7 +41,7 @@ public class Reader implements ItemReader<Map<Integer, String>>{
     	log.info("reader id : {}", id);
     	Map<Integer, String> res = new HashMap<Integer, String>();
         if (id <= MAX) {
-        	String url = "https://www.allocine.fr/film/fichefilm_gen_cfilm=" + id + ".html";
+        	String url = "https://www.allocine.fr/series/ficheserie_gen_cserie=" + id + ".html";
         	String content;
         	try {        		
         		content = this.restTemplate.getForObject(url, String.class);

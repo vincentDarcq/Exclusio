@@ -15,7 +15,7 @@ import wkv.exclusio.entities.Genres;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import wkv.exclusio.repositories.MovieSpecifications;
+import wkv.exclusio.repositories.Specifications;
 
 
 @Service
@@ -52,13 +52,8 @@ public class MovieService {
 		}
 	}
 	
-	public MovieEntity findMovieBySubTitre(String titre) throws Exception {
-		Optional<MovieEntity> movie = this.movieRepository.findByTitreContainingIgnoreCase(titre);
-		if(movie.isPresent()) {
-			return movie.get();
-		}else {
-			throw new Exception("There is no movie for the sub titre "+titre);
-		}
+	public List<MovieEntity> findMovieBySubTitre(String titre) {
+		return this.movieRepository.findByTitreContainingIgnoreCase(titre);
 	}
 
 	public Page<MovieEntity> getPageOfBestAlloGradeMovies(int page) {
@@ -72,9 +67,9 @@ public class MovieService {
 			ObjectRequestForMoviesPageWithExclusion requestBody
 			) {
 		log.info("getting page {} of best allo grade movies with exlusion", page);
-		Pageable pageable = PageRequest.of(page, 8);
+		Pageable pageable = PageRequest.of(page, 24);
 		return movieRepository.findAll(
-				MovieSpecifications.withExclusions(
+				Specifications.movieWithExclusions(
 					requestBody.getGenres(),
 					requestBody.getRealisateurs(),
 					requestBody.getCasting()),
@@ -87,9 +82,9 @@ public class MovieService {
 			ObjectRequestForMoviesPageWithExclusion requestBody
 	) {
 		log.info("getting page {} of best allo grade movies with inclusion", page);
-		Pageable pageable = PageRequest.of(page, 8);
+		Pageable pageable = PageRequest.of(page, 24);
 		return movieRepository.findAll(
-				MovieSpecifications.withInclusions(
+				Specifications.movieWithInclusions(
 						requestBody.getGenres(),
 						requestBody.getRealisateurs(),
 						requestBody.getCasting()),
@@ -101,24 +96,8 @@ public class MovieService {
 		return this.movieRepository.findFirstByOrderByAlloGradeDesc();
 	}
 
-	public List<MovieEntity> getMoviesByGenre(Genres genre){
-		return this.movieRepository.findByGenre(genre);
-	}
-
-	public List<String> getRealisateurs(){
+	public List<String> getRealisateursByOccurences(){
 		return this.movieRepository.findAllDirectorsWithOccurrences();
-	}
-
-	public List<Integer> loadYears(){
-		List<MovieEntity> movies = this.getAll();
-		List<Integer> years = new ArrayList<Integer>();
-		for(MovieEntity movie : movies) {
-			if(!years.contains(movie.getYear())) {
-				years.add(movie.getYear());
-			}
-		}
-		years.sort(Collections.reverseOrder());
-		return years;
 	}
 
 	public List<String> getActorsByOccurences(){

@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import wkv.exclusio.dto.ObjectRequestForMoviesPageWithExclusion;
-import wkv.exclusio.entities.Genres;
 import wkv.exclusio.entities.MovieEntity;
 import wkv.exclusio.services.MovieService;
 
@@ -51,7 +50,7 @@ public class MovieController {
 	
 	@GetMapping("/findSubTitle/{titre}")
 	@ResponseBody
-	public MovieEntity findSubTitle(@PathVariable String titre) {
+	public List<MovieEntity> findSubTitle(@PathVariable String titre) {
 		log.info("titre cherché : {}", titre);
         try {
             return this.movieService.findMovieBySubTitre(titre);
@@ -88,20 +87,20 @@ public class MovieController {
 
 	@GetMapping("/acteurs")
 	@ResponseBody
-	public List<String> listTenActors() {
+	public List<String> listActors() {
 		return this.movieService.getActorsByOccurences();
 	}
 	
 	@GetMapping("/realisateurs")
 	@ResponseBody
-	public List<String> listTenReals() {
-		return this.movieService.getRealisateurs();
+	public List<String> listReals() {
+		return this.movieService.getRealisateursByOccurences();
 	}
 
-	@GetMapping("/byGenre/{genre}")
+	@GetMapping("/number")
 	@ResponseBody
-	public List<MovieEntity> listMoviesByGenre(@PathVariable Genres genre){
-		return this.movieService.getMoviesByGenre(genre);
+	public int getMoviesNumber() {
+		return this.movieService.getAll().size();
 	}
 
 	@GetMapping("/deleteDoublons")

@@ -1,6 +1,4 @@
-package wkv.exclusio.batch.config;
-
-import java.util.Map;
+package wkv.exclusio.batch.series;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -12,38 +10,40 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.client.RestTemplate;
+import wkv.exclusio.entities.SerieEntity;
+import wkv.exclusio.repositories.SerieRepository;
 
-import wkv.exclusio.entities.MovieEntity;
-import wkv.exclusio.repositories.MovieRepository;
+import java.util.Map;
 
 @Configuration
-public class JobConf {
+public class JobConfSeries {
 		
 	@Autowired
 	private RestTemplate restTemplate;
 	
 	@Autowired
-	private MovieRepository movieRepository;
+	private SerieRepository serieRepository;
 	
-	@Bean(name = "alloJob")
-    public Job job(Step step, JobRepository jobRepository) {
-        return new JobBuilder("job", jobRepository)
+	@Bean(name = "alloJobSeries")
+    public Job jobSerie(@Qualifier("stepSerie") Step step, JobRepository jobRepository) {
+        return new JobBuilder("jobSerie", jobRepository)
         	.incrementer(new RunIdIncrementer())
             .start(step)
             .build();
     }
 	
-    @Bean
-    public Step step(
+    @Bean(name = "stepSerie")
+    public Step stepSerie(
     		JobRepository jobRepository,
     		PlatformTransactionManager transactionManager
     ) {
         return new StepBuilder("step", jobRepository)
-            .<Map<Integer, String>, MovieEntity>chunk(1, transactionManager)
+            .<Map<Integer, String>, SerieEntity>chunk(1, transactionManager)
             .reader(reader())
             .processor(processor())
             .writer(writer())
@@ -51,16 +51,16 @@ public class JobConf {
             .build();
     }
 
-    @Bean
+    @Bean(name = "readerSerie")
     public ItemReader<Map<Integer, String>> reader() {
-    	return new Reader(restTemplate, movieRepository);
+    	return new Reader(restTemplate, serieRepository);
     }
-    @Bean
-    public ItemProcessor<Map<Integer, String>, MovieEntity> processor() {
+    @Bean(name = "processorSerie")
+    public ItemProcessor<Map<Integer, String>, SerieEntity> processor() {
     	return new Processor();
     }
-    @Bean
-    public ItemWriter<MovieEntity> writer() {
+    @Bean(name = "writerSerie")
+    public ItemWriter<SerieEntity> writer() {
     	return new Writer();
     }
 }

@@ -1,4 +1,4 @@
-package wkv.exclusio.batch.config;
+package wkv.exclusio.batch.movies;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,28 +61,29 @@ public class Processor implements ItemProcessor<Map<Integer, String>, MovieEntit
         		return null;
         	}else {
         		String movieObjString = movieElement.html();
-        		
-        		Elements avertissement_pegi = body.getElementsByAttributeValue("class", "certificate-text");
-        		
+
         		MovieEntity movie = new MovieEntity();
+
         		movie.setCodeHtmlAllocine(arr.get(0).toString());
+
         		Elements possiblesProductionYear = body.getElementsByAttributeValue("class", "item");
         		for(Element element : possiblesProductionYear) {
-        			if(element.childrenSize() > 0 && element.child(0).html().indexOf("Année de production") != -1) {
+        			if(element.childrenSize() > 0 && element.child(0).html().contains("Année de production")) {
         				if(!Strings.isEmpty(element.child(1).html())) {        					
         					movie.setYear(Integer.parseInt(element.child(1).html()));
         				}
         			}
         		}
+				Elements avertissement_pegi = body.getElementsByAttributeValue("class", "certificate-text");
         		if(avertissement_pegi.size() > 1) {
-        			if(avertissement_pegi.get(0).html().indexOf("Interdit") != -1) {
+        			if(avertissement_pegi.get(0).html().contains("Interdit")) {
         				movie = fillPegi(movie, avertissement_pegi.get(0));
         			}else {
         				movie = fillPegi(movie, avertissement_pegi.get(1));
         			}
         			movie.setAvertissement("Avertissement : des scènes, des propos ou des images peuvent heurter la sensibilité des spectateurs");
         		}else if(avertissement_pegi.size() == 1) {
-        			if(avertissement_pegi.get(0).html().indexOf("Interdit") != -1) {
+        			if(avertissement_pegi.get(0).html().contains("Interdit")) {
         				movie = fillPegi(movie, avertissement_pegi.get(0));
         			}else {
         				movie.setAvertissement("Avertissement : des scènes, des propos ou des images peuvent heurter la sensibilité des spectateurs");

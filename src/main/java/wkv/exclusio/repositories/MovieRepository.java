@@ -21,9 +21,7 @@ public interface MovieRepository extends JpaRepository<MovieEntity, Long>, JpaSp
 
     List<MovieEntity> findByTitre(String titre);
 	
-	Optional<MovieEntity> findByTitreContainingIgnoreCase(String titre);
-
-    List<MovieEntity> findByGenre(Genres genre);
+	List<MovieEntity> findByTitreContainingIgnoreCase(String titre);
 
     Page<MovieEntity> findByOrderByAlloGradeDesc(Pageable page);
 

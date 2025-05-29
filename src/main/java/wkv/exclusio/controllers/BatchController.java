@@ -26,18 +26,33 @@ public class BatchController {
 	private JobLauncher jobLauncher;
 	
 	@Autowired
-	@Qualifier("alloJob")
-	private Job job;
+	@Qualifier("alloJobMovies")
+	private Job jobMovies;
+
+	@Autowired
+	@Qualifier("alloJobSeries")
+	private Job jobSeries;
 	
-	@GetMapping
+	@GetMapping("/movies")
 	@ResponseBody
-	public ResponseEntity<Object> launch() {
+	public ResponseEntity<Object> launchMoviesJob() {
 		try {
-			jobLauncher.run(job, new JobParameters());
+			jobLauncher.run(jobMovies, new JobParameters());
 		} catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException e) {
 			e.printStackTrace();
 		}
 		return ResponseEntity.status(HttpStatus.OK).body("batch launched");
-	}	
+	}
+
+	@GetMapping("/series")
+	@ResponseBody
+	public ResponseEntity<Object> launchSeriesJob() {
+		try {
+			jobLauncher.run(jobSeries, new JobParameters());
+		} catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException e) {
+			e.printStackTrace();
+		}
+		return ResponseEntity.status(HttpStatus.OK).body("batch launched");
+	}
 
 }
