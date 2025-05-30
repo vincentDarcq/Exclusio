@@ -42,7 +42,7 @@ public class SerieService {
             int page,
             ObjectRequestForMoviesPageWithExclusion requestBody
     ) {
-        log.info("getting page {} of best allo grade movies with exlusion", page);
+        log.info("getting page {} of best allo grade series with exlusion", page);
         Pageable pageable = PageRequest.of(page, 24);
         return serieRepository.findAll(
                 Specifications.serieWithExclusions(

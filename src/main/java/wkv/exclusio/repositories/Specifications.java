@@ -52,6 +52,7 @@ public class Specifications {
                 predicates.add(cb.not(root.get("id").in(subquery)));
             }
 
+            predicates.add(cb.isNotNull(root.get("alloGrade")));
             query.orderBy(cb.desc(root.get("alloGrade")));
 
             return cb.and(predicates.toArray(new Predicate[0]));
@@ -84,13 +85,14 @@ public class Specifications {
                 hasAtLeastOneCondition = true;
             }
 
+            predicates.add(cb.isNotNull(root.get("alloGrade")));
             query.orderBy(cb.desc(root.get("alloGrade")));
 
             if (!hasAtLeastOneCondition) {
                 return cb.conjunction();
             }
 
-            return cb.or(predicates.toArray(new Predicate[0]));
+            return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
 
@@ -133,6 +135,7 @@ public class Specifications {
                 predicates.add(cb.not(root.get("id").in(subquery)));
             }
 
+            predicates.add(cb.isNotNull(root.get("alloGrade")));
             query.orderBy(cb.desc(root.get("alloGrade")));
 
             return cb.and(predicates.toArray(new Predicate[0]));
@@ -165,13 +168,14 @@ public class Specifications {
                 hasAtLeastOneCondition = true;
             }
 
+            predicates.add(cb.isNotNull(root.get("alloGrade")));
             query.orderBy(cb.desc(root.get("alloGrade")));
 
             if (!hasAtLeastOneCondition) {
                 return cb.conjunction();
             }
 
-            return cb.or(predicates.toArray(new Predicate[0]));
+            return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
 }
