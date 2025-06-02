@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import wkv.exclusio.dto.ObjectRequestForMoviesPageWithExclusion;
+import wkv.exclusio.dto.ObjectRequestForMoviesPageWithFilters;
 import wkv.exclusio.entities.MovieEntity;
 import wkv.exclusio.services.MovieService;
 
@@ -33,7 +34,7 @@ public class MovieController {
 	
 	@PostMapping
 	public MovieEntity create(@RequestBody MovieEntity movie) {
-		return this.movieService.create(movie);
+		return this.movieService.save(movie);
 	}
 
 	@GetMapping("/{page}")
@@ -58,6 +59,15 @@ public class MovieController {
             throw new RuntimeException(e);
         }
     }
+
+	@PostMapping("/filters/{page}")
+	@ResponseBody
+	public Page<MovieEntity> listMoviesWithFilters(
+			@PathVariable int page,
+			@RequestBody ObjectRequestForMoviesPageWithFilters requestBody
+	) {
+		return this.movieService.getPageOfBestAlloGradeMoviesWithFilters(page, requestBody);
+	}
 	
 	@PostMapping("/exclusions/{page}")
 	@ResponseBody

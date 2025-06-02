@@ -1,0 +1,324 @@
+.films {
+    position: relative;
+}
+.filters-bar-films, .filters-elements{
+    width: 80vw;
+    margin: auto;
+}
+
+.filters-bar-films {
+    background-color: black;
+    padding: 0 20px;
+    border-radius: 20px;
+    box-shadow: 0 0 2px gray;
+}
+.filter-begin{
+    padding: 10px;
+}
+.filter-style{
+    cursor:pointer;
+    border: solid 1px #feffff;
+}
+.filter-style, .filter-style-active{
+    letter-spacing: 1px;
+    padding: 10px;
+    border-radius: 10px;
+    color: #76789e;
+    font-weight: 300;
+    background-image: -webkit-linear-gradient(to right, #ffffff, rgb(230, 230, 230), #444444);
+    background-image: linear-gradient(to right, #ffffff, rgb(230, 230, 230), #444444);
+    margin-right: 10px;
+}
+.filter-style-active {
+    color: #FFFF;
+    border: solid 1px #cfa1ff;
+    background-image: -webkit-linear-gradient(to right, #726e9c, black);
+    background-image: linear-gradient(to right, #726e9c, black);
+}
+.element {
+    justify-content: space-between !important;
+    height: 200px;
+    width: 30%;
+    margin: 5px;
+    border: solid 1px #646977;
+    border-radius: 10px;
+    display: flex; 
+    justify-content: center;
+    align-items: center;
+    background-color: #262b39;
+    transition: opacity 0.3s ease-out, transform 0.5s ease;
+    .element-text{
+        margin: 2px 0;
+        background-color: gray;
+        border-radius: 10px;
+        width: 98%;
+        height: 95%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+}
+
+.element.fade-out {
+    opacity: 0;
+    transform: translateX(-100px);
+    pointer-events: none;
+}
+
+.element.slide-in {
+    opacity: 0;
+    transform: translateX(100px);
+    animation: slideIn 0.5s forwards;
+}
+.icons-selection {
+    width: 70%;
+    justify-content: space-between;
+    margin: 8px;
+    p{
+        margin: 5px 0;
+    }
+}
+.red-cross, .green-validate{
+    height: 20px;
+    width: 20px;
+    cursor: pointer;
+}
+.red-cross {
+    border: solid 1px #FFFF;
+    border-radius: 20px;
+    padding: 5px;
+    background-color: #6a6f7a;
+}
+.green-validate{
+    background: linear-gradient(to right, #2563fc, #a249fc);
+    border-radius: 20px;
+    padding: 5px;
+    position: relative;
+    border: solid 1px #cfa0fe;
+}
+
+.green-validate::before {
+    content: '';
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    bottom: 1px;
+    left: 1px;
+    background: white;
+    border-radius: 19px;
+    z-index: 1;
+}
+  
+.green-validate > * {
+    position: relative;
+    z-index: 2;
+}
+.films-filters p {
+    margin: 0;
+}
+
+.films-filters .film-header-tab{
+    cursor: pointer;
+    padding: 10px;
+}
+.films-filters .films-filters-tabs{
+    width: fit-content;
+    margin: auto;
+    gap: 20px;
+}
+
+.films-filters .genres, .films-filters .directors, .films-filters .actors{
+    padding: 10px;
+    margin: auto;
+    height: 110px;
+    width: 80vw;
+    border: solid 2px rgba(0, 0, 0, 0.3);
+    justify-content: center;
+    img {
+        width: 100px;
+    }
+}
+.films-filters .element {
+    width: 180px;
+}
+
+.films-filters .directors, .films-filters .actors {
+    height: 400px;
+    overflow: auto;
+    .element{
+        margin: 10px;
+        padding: 1px;
+        cursor: pointer;
+        border: solid 2px #828282;
+        border-radius: 10px;
+        img {
+            border-radius: 10px;
+        }
+    }
+}
+
+.genres, .directors, .actors{
+    padding: 10px;
+    margin: auto;
+    height: 110px;
+    width: 80vw;
+    border: solid 2px rgba(0, 0, 0, 0.3);
+    justify-content: center;
+    img {
+        width: 100px;
+    }
+}
+
+.directors, .actors {
+    height: 400px;
+    overflow: auto;
+    .element{
+        margin: 10px;
+        padding: 1px;
+        cursor: pointer;
+        border: solid 2px #828282;
+        border-radius: 10px;
+        img {
+            border-radius: 10px;
+        }
+    }
+}
+
+.films-filters .flex-column{
+    justify-content: start;
+}
+
+.films-filters .directors .element, .films-filters .actors .element {
+    width: 100px;
+}
+
+.films-filters input[type=checkbox] {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -ms-appearance: none;
+    border-radius: 4px;
+    height: 13px;
+    width: 13px;
+    margin: 0;
+    background: transparent;
+    border: 2px solid #ccc;
+    cursor: pointer;
+}
+
+.films-filters input[type="checkbox"]:checked {
+  background: #FFFF !important;
+}
+
+.fa-arrow-circle-down {
+    margin: auto;
+    cursor: pointer;
+}
+
+.films-filters input {
+    width: fit-content;
+    margin: 0 auto;
+    border-radius: 10px;
+    border: none;
+}
+
+.directors input, .actors input {
+    padding: 8px;
+}
+.selection_films{
+    width:70vw;
+    margin: 25px auto;
+    border-bottom: solid 1px #FFFF;
+}
+
+.films_1, .films_2, .films_3 {
+    position: absolute;
+    width: 90%;
+    gap: 40px;
+    padding-bottom: 30px;
+}
+
+.films_1 > img, .films_2 > img, .films_3 > img {
+    cursor: pointer;
+    flex: 1 1 0;
+    object-fit: cover;
+    min-width: 0;
+}
+
+.img-movie:hover {
+    scale: 1.2;
+}
+
+.carousels .arrow-invisible{
+    color: transparent;
+}
+
+.enter-right {
+  animation: enterFromRight 0.5s ease forwards;
+}
+
+.enter-left {
+  animation: enterFromLeft 0.5s ease forwards;
+}
+
+.leave-left {
+  animation: leaveToLeft 0.5s ease forwards;
+}
+
+.leave-right {
+  animation: leaveToRight 0.5s ease forwards;
+}
+
+.film-popup{
+    display: none;
+    position: fixed;
+    background: #0F0C29;
+    background-image: -webkit-linear-gradient(to right, #24243E, #28226e, #0F0C29);
+    background-image: linear-gradient(to right, #24243E, #28226e, #0F0C29);
+    left: 15%;
+    top: 10%;
+    z-index: 150;
+    border-radius: 10px;
+    height: 70vh;
+    width: 60vw;
+    padding: 20px;
+    box-shadow: 0px 0px 3px 3px #28226e;
+}
+
+.film-popup .header {
+    justify-content: space-between;
+}
+
+.film-popup .cross{
+    padding: 5px;
+    border-radius: 50%;
+    border: solid 1px #FFFF;
+    height: 18px;
+    cursor: pointer;
+}
+
+.film-popup .film-title {
+    width: fit-content;
+    margin: 10px auto;
+}
+.film-popup .infos {
+    justify-content: space-between;
+    .flex-column{
+        width: 70%;
+    }
+}
+.film-popup p {
+    height: 200px;
+    overflow-y: auto;
+}
+
+.film-popup .notes {
+    gap: 30px;
+}
+.film-popup img {
+    width: 120px;
+}
+
+.film-popup h4 {
+    margin: 5px;
+}

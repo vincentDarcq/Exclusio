@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import wkv.exclusio.dto.ObjectRequestForMoviesPageWithFilters;
 import wkv.exclusio.entities.MovieEntity;
 import wkv.exclusio.repositories.MovieRepository;
 import wkv.exclusio.dto.ObjectRequestForMoviesPageWithExclusion;
@@ -39,7 +40,7 @@ public class MovieService {
 		}
 	}
 
-	public MovieEntity create(MovieEntity movie) {
+	public MovieEntity save(MovieEntity movie) {
 		return this.movieRepository.save(movie);
 	}
 
@@ -61,6 +62,24 @@ public class MovieService {
         Pageable pageable = PageRequest.of(page, 8);
         return this.movieRepository.findByOrderByAlloGradeDesc(pageable);
     }
+
+	public Page<MovieEntity> getPageOfBestAlloGradeMoviesWithFilters(
+			int page,
+			ObjectRequestForMoviesPageWithFilters requestBody
+	) {
+		log.info("getting page {} of best allo grade movies with filter", page);
+		Pageable pageable = PageRequest.of(page, 24);
+		return movieRepository.findAll(
+				Specifications.movieWithFilters(
+						requestBody.getGenresToInclude(),
+						requestBody.getRealisateursToInclude(),
+						requestBody.getCastingToInclude(),
+						requestBody.getGenresToExclude(),
+						requestBody.getRealisateursToExclude(),
+						requestBody.getCastingToExclude()),
+				pageable
+		);
+	}
 	
 	public Page<MovieEntity> getPageOfBestAlloGradeMoviesWithExclusions(
 			int page, 
@@ -107,6 +126,10 @@ public class MovieService {
 	public void deleteMovie(MovieEntity movie) {
 		System.out.println("delete " + movie.getTitre());
 		this.movieRepository.delete(movie);
+	}
+
+	public List<MovieEntity> findMovieWithoutCov(){
+		return this.movieRepository.findAllWithCovPortraitContaining("empty");
 	}
 
 	public void putGenre(String genre, List<Genres> genresToSave) {

@@ -10,4 +10,6 @@ import lombok.NoArgsConstructor;
 public class ImdbResultDto {
     private String id;
     private String qid;
+    private String l;
+    private Integer y;
 }

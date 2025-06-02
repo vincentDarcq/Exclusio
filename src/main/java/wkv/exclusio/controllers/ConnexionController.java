@@ -62,7 +62,6 @@ public class ConnexionController {
     }
 
     private String generateToken(String userId) {
-        // Exemple de JWT simple (durée de vie : 1 heure)
         return Jwts.builder()
                 .setSubject(userId)
                 .setIssuedAt(new Date())

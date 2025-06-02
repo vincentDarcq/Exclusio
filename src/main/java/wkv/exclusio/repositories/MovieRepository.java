@@ -43,4 +43,7 @@ public interface MovieRepository extends JpaRepository<MovieEntity, Long>, JpaSp
     
     MovieEntity findFirstByOrderByAlloGradeDesc();
 
+    @Query("SELECT m FROM MovieEntity m WHERE m.covPortrait LIKE %:keyword%")
+    List<MovieEntity> findAllWithCovPortraitContaining(@Param("keyword") String keyword);
+
 }

@@ -94,43 +94,41 @@ public class Processor implements ItemProcessor<Map<Integer, String>, MovieEntit
         		}
         		JSONObject movieObject = new JSONObject(movieObjString);
         		movie.setTitre(movieObject.getString("name"));
-				String imdbTitle = movie.getTitre().replace("%", "%25").replace(" ", "%20").replace("?", "3F").replace(",", "%2C").replace("#", "%23").replace("$", "%24").replace("&", "%26");
-				movie = imdbService.findGrade(movie, imdbTitle);
+
         		log.info("processing movie : {}", movie.getTitre());
         		List<Genres> genresToSave = new ArrayList<Genres>();
-        		if(movieObject.get("genre") instanceof String) {
-        			this.movieService.putGenre(movieObject.getString("genre"), genresToSave);
-        		}else {
-        			JSONArray arrJson = movieObject.getJSONArray("genre");
-        			String[] genres = new String[arrJson.length()];
-        			for(int i = 0; i < arrJson.length(); i++) {
-        				genres[i] = arrJson.getString(i);
-        				this.movieService.putGenre(genres[i], genresToSave);
-        			}
-        		}
+				var genreObj = movieObject.get("genre");
+
+				if (genreObj instanceof String genre) {
+					movieService.putGenre(genre, genresToSave);
+				} else if (genreObj instanceof JSONArray arrJson) {
+					for (int i = 0; i < arrJson.length(); i++) {
+						movieService.putGenre(arrJson.getString(i), genresToSave);
+					}
+				}
         		movie.setGenre(genresToSave);
-        		if(movieObject.has("duration")){
-        			String duration = movieObject.getString("duration");
-        			String heure = "";
-        			if(duration.contains("01H")) {
-        				heure = "60";
-        			}else if(duration.contains("02H")) {
-        				heure = "120";
-        			}else if(duration.contains("03H")) {
-        				heure = "180";
-        			}else if(duration.contains("04H")) {
-        				heure = "240";
-        			}
-        			int index = duration.indexOf('H');
-        			int min = Integer.parseInt(duration.substring(index+1, index+3));
-        			int duree = 0;
-        			if(!heure.equals("")){
-        				duree = Integer.parseInt(heure) + min;
-        			}else{
-        				duree = min;
-        			}
-        			movie.setTime(duree+"min");
-        		}
+				if(movieObject.has("duration")){
+					String duration = movieObject.getString("duration");
+					String heure = "";
+					if(duration.contains("01H")) {
+						heure = "60";
+					}else if(duration.contains("02H")) {
+						heure = "120";
+					}else if(duration.contains("03H")) {
+						heure = "180";
+					}else if(duration.contains("04H")) {
+						heure = "240";
+					}
+					int index = duration.indexOf('H');
+					int min = Integer.parseInt(duration.substring(index+1, index+3));
+					int duree = 0;
+					if(!heure.equals("")){
+						duree = Integer.parseInt(heure) + min;
+					}else{
+						duree = min;
+					}
+					movie.setTime(duree+"min");
+				}
         		if(movieObject.has("description")){
         			movie.setSynopsis(movieObject.getString("description"));
         		}
@@ -142,67 +140,65 @@ public class Processor implements ItemProcessor<Map<Integer, String>, MovieEntit
         				log.info("impossible d'extraire l'image avec l'objet: {}", movieObject);
         			}
         		}
+				String imdbTitle = movie.getTitre().replace("%", "%25").replace(" ", "%20").replace("?", "3F").replace(",", "%2C").replace("#", "%23").replace("$", "%24").replace("&", "%26").replace("è", "%C3%A8");
+				movie = imdbService.findImdbInfos(movie, imdbTitle, !movie.getCovPortrait().contains("empty"));
         		if(movieObject.has("director")){
-        			List<String> realisateurs = new ArrayList<String>();
-        			if(movieObject.get("director") instanceof JSONObject){
-        				JSONObject jsonDirector = movieObject.getJSONObject("director");
-        				int indexVirguleDirector = jsonDirector.getString("name").indexOf("&#039;");
-        				if(indexVirguleDirector != -1) {
-        					realisateurs.add(jsonDirector.getString("name").substring(0, indexVirguleDirector));
-        					realisateurs.add(jsonDirector.getString("name").substring(indexVirguleDirector+6));
-        					realisateurs.add(
-        							jsonDirector.getString("name").substring(0, indexVirguleDirector) + "'" +
-        									jsonDirector.getString("name").substring(indexVirguleDirector+6));
-        				}else {
-        					realisateurs.add(jsonDirector.getString("name"));
-        				}
-        				movie.setRealisateur(realisateurs);
-        			}else {
-        				JSONArray arrDirectors = movieObject.getJSONArray("director");
-        				for(int i = 0; i < arrDirectors.length(); i++) {
-        					realisateurs.add(arrDirectors.getJSONObject(i).getString("name"));
-        				}
-        				movie.setRealisateur(realisateurs);
-        			}
+					var realisateurs = new ArrayList<String>();
+					var directorObj = movieObject.get("director");
+
+					if (directorObj instanceof JSONObject jsonDirector) {
+						var name = jsonDirector.getString("name");
+						var index = name.indexOf("&#039;");
+
+						if (index != -1) {
+							var part1 = name.substring(0, index);
+							var part2 = name.substring(index + 6); // &#039; → 6 caractères
+							realisateurs.add(part1);
+							realisateurs.add(part2);
+							realisateurs.add(part1 + "'" + part2);
+						} else {
+							realisateurs.add(name);
+						}
+
+					} else if (directorObj instanceof JSONArray arrDirectors) {
+						for (int i = 0; i < arrDirectors.length(); i++) {
+							realisateurs.add(arrDirectors.getJSONObject(i).getString("name"));
+						}
+					}
+
+					movie.setRealisateur(realisateurs);
         		}
         		if(movieObject.has("actor")) {
-        			List<String> casting = new ArrayList<String>();
-        			if(movieObject.get("actor") instanceof JSONObject){
-        				JSONObject jsonActor = movieObject.getJSONObject("actor");
-        				casting.add(jsonActor.getString("name"));
-        				movie.setCasting(casting);
-        			}else {
-        				JSONArray actors = new JSONArray(movieObject.getJSONArray("actor"));
-        				for (int i = 0; i < actors.length(); i++) {
-        					JSONObject actor = actors.getJSONObject(i);
-        					int indexVirguleActor = actor.getString("name").indexOf("&#039;");
-        					if (i == 0) {
-        						if (indexVirguleActor != -1) {
-        							casting.add(
-        									actor.getString("name").substring(0, indexVirguleActor) + "'" +
-        											actor.getString("name").substring(indexVirguleActor + 6));
-        						} else {
-        							casting.add(actor.getString("name"));
-        						}
-        					} else {
-        						if (indexVirguleActor != -1) {
-        							casting.add(", " +
-        									actor.getString("name").substring(0, indexVirguleActor) + "'" +
-        									actor.getString("name").substring(indexVirguleActor + 6));
-        						} else {
-        							casting.add(actor.getString("name"));
-        						}
-        					}
-        				}
-        				movie.setCasting(casting);
-        			}
+					var casting = new ArrayList<String>();
+					var actorObj = movieObject.get("actor");
+
+					if (actorObj instanceof JSONObject jsonActor) {
+						casting.add(jsonActor.getString("name"));
+					} else if (actorObj instanceof JSONArray actors) {
+						for (int i = 0; i < actors.length(); i++) {
+							var name = actors.getJSONObject(i).getString("name");
+							var index = name.indexOf("&#039;");
+
+							var formattedName = (index != -1)
+									? name.substring(0, index) + "'" + name.substring(index + 6)
+									: name;
+
+							// Préfixe uniquement à partir du deuxième acteur
+							if (i > 0) {
+								formattedName = ", " + formattedName;
+							}
+
+							casting.add(formattedName);
+						}
+					}
+
+					movie.setCasting(casting);
         		}
-        		if(movieObject.has("aggregateRating")) {
-        			JSONObject aggregateRating = movieObject.getJSONObject("aggregateRating");
-        			int indexVirgule = aggregateRating.getString("ratingValue").indexOf(',');
-        			String note = aggregateRating.getString("ratingValue").substring(0, indexVirgule) + "." + aggregateRating.getString("ratingValue").substring(indexVirgule + 1);
-        			movie.setAlloGrade(Float.parseFloat(note));
-        		}
+				if (movieObject.has("aggregateRating")) {
+					var aggregateRating = movieObject.getJSONObject("aggregateRating");
+					var ratingStr = aggregateRating.getString("ratingValue").replace(',', '.');
+					movie.setAlloGrade(Float.parseFloat(ratingStr));
+				}
         		return movie;
         	}
         }
